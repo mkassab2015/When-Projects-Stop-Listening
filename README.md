@@ -291,20 +291,7 @@ MANUAL_VALIDATION_SIZE = 1000  # Issues to sample for classifier validation
 
 ---
 
-## Citation
 
-If you use this code or data, please cite:
-
-```bibtex
-@inproceedings{kassab2027projects,
-  title     = {When Projects Stop Listening: Requirements Disengagement as a
-               Longitudinal Precursor to Open-Source Software Abandonment},
-  booktitle = {Proceedings of the 60th Hawaii International Conference on
-               System Sciences (HICSS)},
-  year      = {2027},
-  note      = {To appear}
-}
-```
 
 ---
 
