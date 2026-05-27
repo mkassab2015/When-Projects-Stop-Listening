@@ -1,6 +1,6 @@
 # When Projects Stop Listening: Requirements Disengagement as a Longitudinal Precursor to Open-Source Software Abandonment
 
-> **HICSS 2027 Submission** | Empirical Software Engineering | Mining Software Repositories
+> **HICSS 2027 Submission** 
 
 This repository contains the complete, reproducible analysis pipeline for the paper *"When Projects Stop Listening: Requirements Disengagement as a Longitudinal Precursor to Open-Source Software Abandonment"*. The study introduces **Requirements Decay** as a four-dimensional construct and provides the first longitudinal matched-cohort evidence of requirements-related deterioration preceding OSS project abandonment.
 
