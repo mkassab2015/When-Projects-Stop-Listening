@@ -1,168 +1,269 @@
-# Requirements Decay Study — Run Guide (v3, all fixes applied)
+# When Projects Stop Listening
 
-All outputs saved to Google Drive:
-```
-/content/drive/MyDrive/requirements_decay_study/
-├── raw/           Raw API extractions
-├── processed/     Cleaned and derived datasets
-├── manual_coding/ Manual classification files
-├── results/       Model outputs, tables, validation reports
-├── figures/       Trend plots and combined panels
-└── checkpoints/   Progress logs (JSON + CSV)
-```
+Reproduction materials for an empirical study of **human-oriented explanation traces** in public GitHub repositories before and after the mainstreaming of generative AI coding assistants. The study mines commit messages and opened issues from ~800 longitudinally active repositories (Jan 2021 – Apr 2026) and estimates temporal changes around a January 2023 intervention point using interrupted time-series and repository fixed-effects models.
+
+> **Causal scope.** This is an observational, quasi-experimental design. It does not establish that generative AI caused any observed change. The January 2023 intervention point is a *temporal landmark* corresponding to the mainstreaming of ChatGPT and adjacent tools, not an exogenous shock applied to repositories.
 
 ---
 
-## Initial Colab setup
+## Repository layout
 
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-
-import os
-os.environ['GITHUB_TOKEN'] = 'ghp_your_token_here'
+```
+.
+├── Scripts/                                   # 23 executable cells (one per notebook cell)
+│   ├── cell_01_install_libraries.py
+│   ├── cell_02_imports_utilities.py
+│   ├── cell_03_interactive_configuration.py
+│   ├── cell_04_authenticate_and_autosave_setup.py
+│   ├── cell_05_define_text_metrics.py
+│   ├── cell_06_query_candidate_repositories.py
+│   ├── cell_07_enrich_metadata_checkpointed.py
+│   ├── cell_08_final_repository_sample.py
+│   ├── cell_09_upload_repo_list_to_bigquery.py
+│   ├── cell_10_extract_commit_messages.py
+│   ├── cell_11_extract_issues.py
+│   ├── cell_12_compute_commit_metrics.py
+│   ├── cell_13_compute_issue_metrics.py
+│   ├── cell_14_create_monthly_panel.py
+│   ├── cell_15_descriptive_statistics.py
+│   ├── cell_16_effect_sizes_tests.py
+│   ├── cell_17_interrupted_time_series_models.py
+│   ├── cell_18_fixed_effects_sensitivity.py
+│   ├── cell_19_generate_trend_figures.py
+│   ├── cell_20_create_excel_workbook.py
+│   ├── cell_21_create_methodological_audit_log.py
+│   ├── cell_22_package_and_download.py
+│   └── cell_23_download_key_files.py
+├── figures-…/figures/                         # Per-metric ITS trend plots (PNG, 300 dpi)
+├── results-…/results/                         # Tables, panel data, audit log, Excel workbook
+└── README.md
 ```
 
-A classic GitHub token with `public_repo` scope is sufficient.
-Without a token: 60 API requests/hour. Authenticated: 5,000/hour.
+Each `cell_*.py` file corresponds to one cell in the original Colab notebook and is intended to be executed in numerical order. Cells share state via top-level Python variables, so they must run in the same Python session (e.g., as sequential `%run` calls in a single Colab notebook).
+
+---
+
+## Environment
+
+The pipeline is designed to run **entirely in Google Colab**. It requires:
+
+- A Google Cloud project with **BigQuery enabled** and billing attached (for queries against the public `githubarchive.month.*` tables)
+- A **GitHub personal access token** with `public_repo` scope (for metadata enrichment of candidate repositories via the REST API)
+- Optionally, **Google Drive** mounted for autosave (recommended; protects against Colab disconnects)
+
+Python packages installed by `cell_01_install_libraries.py`:
+
+`google-cloud-bigquery`, `pandas-gbq`, `pyarrow`, `tqdm`, `textstat`, `statsmodels`, `scipy`, `scikit-learn`, `openpyxl`, `xlsxwriter`.
+
+No source code is cloned. The study uses GH Archive event payloads (commit messages, issue titles, issue bodies) and GitHub REST metadata only.
 
 ---
 
 ## Run order
 
-```python
-%run 00_config.py
-%run 01_github_helpers.py
-%run 02_discover_repositories.py      # ~30–90 min for 100+100
-%run 03_match_repositories.py
-%run 04_build_repo_panel.py
-%run 05_extract_issues_comments.py    # longest step; auto-resumes
-%run 06_auto_classify_requirements.py
-%run 07_create_manual_coding_sample.py
-```
-
----
-
-## STOP FOR MANUAL CLASSIFICATION
-
-Open:
-```
-MyDrive/requirements_decay_study/manual_coding/manual_coding_sample.csv
-```
-Fill the `manual_*` columns using the codebook printed by script 07.
-Save as:
-```
-MyDrive/requirements_decay_study/manual_coding/manual_coding_completed.csv
-```
-
-### Intra-rater reliability (strongly recommended)
-Recode 15% of issues after a 2-week gap. Save as:
-```
-MyDrive/requirements_decay_study/manual_coding/manual_recode_sample.csv
-```
-Required columns: `issue_id`, `manual_is_requirement_recode`
-Script 08 computes Cohen's kappa automatically.
-
-### Skipping manual classification
-Script 08 falls back gracefully to auto labels only and logs a
-limitations note. Acknowledge explicitly in manuscript Threats to Validity.
-
----
-
-## Continue
+In a Colab notebook, execute the cells sequentially:
 
 ```python
-%run 08_evaluate_and_merge_manual_labels.py
-%run 09_compute_negotiation_metrics.py
-%run 10_build_repository_month_metrics.py
-%run 11_extract_commit_controls.py    # auto-resumes on disconnect
-%run 12_generate_plots.py
-%run 13_mixed_effects_models.py
-%run 14_robustness_checks.py
-%run 15_export_manuscript_tables.py
+%run cell_01_install_libraries.py
+%run cell_02_imports_utilities.py
+%run cell_03_interactive_configuration.py      # prompts for project ID, GitHub token, dates
+%run cell_04_authenticate_and_autosave_setup.py
+%run cell_05_define_text_metrics.py
+%run cell_06_query_candidate_repositories.py   # BigQuery, GH Archive
+%run cell_07_enrich_metadata_checkpointed.py   # GitHub REST API; auto-resumes from pickle checkpoint
+%run cell_08_final_repository_sample.py
+%run cell_09_upload_repo_list_to_bigquery.py   # creates temp dataset for join
+%run cell_10_extract_commit_messages.py        # BigQuery, PushEvent payloads
+%run cell_11_extract_issues.py                 # BigQuery, IssuesEvent payloads (action='opened')
+%run cell_12_compute_commit_metrics.py
+%run cell_13_compute_issue_metrics.py
+%run cell_14_create_monthly_panel.py
+%run cell_15_descriptive_statistics.py
+%run cell_16_effect_sizes_tests.py             # Mann–Whitney U + Cliff's delta
+%run cell_17_interrupted_time_series_models.py # OLS w/ HC3, segmented regression
+%run cell_18_fixed_effects_sensitivity.py      # adds C(repo_name) fixed effects
+%run cell_19_generate_trend_figures.py         # one PNG per metric
+%run cell_20_create_excel_workbook.py          # consolidated workbook
+%run cell_21_create_methodological_audit_log.py
+%run cell_22_package_and_download.py           # zip + browser download
+%run cell_23_download_key_files.py             # individual file downloads
 ```
 
----
+Cell `03` is interactive and prompts for configuration values. Defaults used to produce the released results:
 
-## Pilot vs full study
+| Parameter | Default | Notes |
+|---|---|---|
+| `study_start_yyyymm` | `202101` | Jan 2021 |
+| `study_end_yyyymm` | `202604` | Apr 2026 |
+| `intervention_yyyymm` | `202301` | Jan 2023 — temporal landmark |
+| `candidate_repo_target` | `3000` | initial pool from BigQuery |
+| `final_repo_target` | `800` | analyzed sample |
+| `min_pre_months_active` | `6` | activity threshold pre-intervention |
+| `min_post_months_active` | `6` | activity threshold post-intervention |
+| `min_total_events` | `50` | combined PushEvent + IssuesEvent |
+| `random_seed` | `2027` | reproducibility |
 
-In `00_config.py`:
-```python
-N_ABANDONED = 10   # → change to 100 for full study
-N_ACTIVE    = 10   # → change to 100 for full study
-```
-Run the full pipeline at N=10 first. After it succeeds end-to-end,
-delete `raw/` and `processed/` and rerun from script 02 with N=100.
-
----
-
-## All fixes applied (v3)
-
-| Fix | Severity | Script | Description |
-|---|---|---|---|
-| Word-boundary domain matching | Moderate | 00 | `\b` regex prevents 'ml'→'email', 'ai'→'trail' etc. |
-| **Broken regex patterns fixed** | **Serious** | **00** | **All malformed `\b(^\|[^a-z])X([^a-z]\|$)\b` replaced with clean `\bX\b`** |
-| Codebook embedded in config | Moderate | 00, 07 | No external file path dependency in Colab |
-| Active cohort verification moved to correct window | **Serious** | **02, 04** | **Verification now uses pseudo-T0 window (not own pushed_at). Pairs where active repo fails are dropped and logged.** |
-| Endogenous control removed | Serious | 13, 14 | `log_total_issues` excluded from issue-count outcome models |
-| BH-FDR multiple testing correction | Critical | 13, 14 | Applied across all 9 outcomes; `p_interaction_fdr` is primary criterion |
-| `discussion_depth` floor fix | Serious | 09 | Zero for ignored issues; was incorrectly returning 1 |
-| Bootstrap CI seeded | Minor | 12 | `np.random.seed(42)` for reproducible figures |
-| `first_response_hours` theoretically capped | Minor | 09 | Capped at 8,760h (1 year); theoretically motivated; per-cohort safe |
-| `include_groups=False` in groupby.apply | Minor | 09 | Prevents pandas ≥2.2 deprecation warning/error |
-| Cohen's d uses repo-level means | Moderate | 13 | Respects clustered structure; prevents inflated effect sizes |
-| T4 t-test disclaimer | Moderate | 15 | Repeated-measures t-tests labelled DESCRIPTIVE_ONLY |
-| T5 pairwise correlations | Moderate | 15 | Pairwise complete obs replaces listwise dropna; avoids selection bias |
-| T6 reports raw + FDR p-values | Critical | 15 | Both columns reported; FDR is primary |
-| `requirement_ratio` caveat in T6 | Moderate | 15 | Printed note flagging ratio instability; count metric is primary |
-| T7 FDR per robustness spec | Critical | 14, 15 | BH-FDR applied within each specification |
-| Robustness checks now test all 9 outcomes | Moderate | 14 | Aligned with script 13; FDR pools comparable |
-| `no_commit_control` spec corrected | Moderate | 14 | Issue-count models now use `log_total_issues` in this spec (not empty) |
+The exact configuration is persisted as `study_config.json` alongside the results.
 
 ---
 
-## Key methodological decisions for manuscript
+## Data sources
 
-| Decision | Where documented |
+1. **GH Archive** (`githubarchive.month.*` via BigQuery): monthly event tables (`PushEvent`, `IssuesEvent`) for the study window. Pull requests are excluded from issue extraction by filtering on `payload.issue.pull_request.url IS NULL`.
+2. **GitHub REST API** (`/repos/{owner}/{repo}`): metadata enrichment (stars, language, owner type, fork flag, archived flag, creation/update timestamps). Authenticated requests honour `X-RateLimit-Reset` headers and back off automatically.
+
+---
+
+## Sampling
+
+`cell_06` queries GH Archive for repositories that:
+
+- Were active in at least 6 calendar months before January 2023, and at least 6 months after,
+- Had ≥ 50 combined `PushEvent` + `IssuesEvent` events across the full window,
+- Had ≥ 3 issue-opening events in both pre- and post-intervention periods,
+- Are returned in deterministic order via `FARM_FINGERPRINT(repo_name, seed)`.
+
+The candidate pool (target: 3,000) is then enriched via REST metadata (`cell_07`) and filtered in `cell_08` to drop forks, archived repos, and metadata-failed rows. The final sample is 800 repositories, drawn with `random_state = 2027`.
+
+The realised sample (`final_repository_sample.csv`) contains 800 repositories with 21 metadata columns.
+
+---
+
+## Operationalisation of explanation traces
+
+Defined in `cell_05_define_text_metrics.py`. All markers are **substring matches over lowercased, whitespace-normalised text**.
+
+**Commit message metrics** (per commit):
+
+| Metric | Definition |
 |---|---|
-| Abandonment verified by commit count (zero post-T0, ≥MIN pre-T0) | Script 02 |
-| Active cohort verified by commit count (≥MIN in window) | Script 02 |
-| Domain inferred from GitHub topics via word-boundary regex | Script 00 |
-| Matching: (language × domain) strata, NN on log_stars/log_forks/age | Script 03 |
-| Balance table (SMD) proves cohort comparability | Script 03 |
-| 1000-result cap handled by recursive date-window splitting | Script 01 |
-| OR-classifier: high recall, precision validated in script 08 | Script 06 |
-| `bug_expectation` separate type — not merged with feature | Script 06 |
-| `discussion_depth = 0` for ignored issues (floor corrected) | Script 09 |
-| `first_response_hours` winsorised at 99th pct | Script 09 |
-| `log_total_issues` excluded for issue-count outcomes (post-treatment) | Script 13 |
-| BH-FDR correction (9 outcomes) — primary significance criterion | Script 13 |
-| Random slopes compared to intercepts by AIC | Script 13 |
-| Cohen's d on repo-level means (clustered) | Script 13 |
-| 4 robustness checks with FDR within each specification | Script 14 |
-| T4 t-tests flagged as descriptive only | Script 15 |
-| Calendar-time confound (pseudo-T0) acknowledged and mitigated | Script 04 |
+| `commit_words` | word count of the full commit message |
+| `commit_is_generic` | 1 if the subject line matches one of: `fix(es\|ed)?`, `update(s\|d)?`, `change(s\|d)?`, `misc`, `wip`, `cleanup`, `minor`, `bugfix`, `stuff`, `test` (anchored regex) |
+| `commit_has_rationale` | 1 if the message contains any of: *because, due to, so that, in order to, avoid, prevent, support, enable, refactor, improve, reduce, handle, resolve, ensure, simplify, optimize, deprecate* |
+
+**Issue metrics** (per opened issue, title + body concatenated):
+
+| Metric | Definition |
+|---|---|
+| `issue_total_words` | word count of title + body |
+| `issue_has_repro` | contains any of: *steps to reproduce, reproduce, reproduction, minimal example, mre, to reproduce* |
+| `issue_has_expected_actual` | contains any of: *expected behavior, actual behavior, expected, actual result, what happened* |
+| `issue_has_environment` | contains any of: *environment, version, os, operating system, browser, python, node, java, npm, pip, platform* |
+| `issue_has_vague_marker` | contains any of: *not working, doesn't work, does not work, broken, help, error, bug, problem, issue* |
+
+> **No manual validation of these markers was performed.** The dictionaries are intentionally simple, transparent, and reproducible, but they are unvalidated against human judgement. They should be read as proxies, not ground truth — see Threats to Validity.
+
+Item-level metrics are aggregated to **repository × month** means/ratios (`cell_12`, `cell_13`) and merged into a complete repo-month panel covering all months in the study window (`cell_14`), with `post_ai_period` and `time_after_intervention` derived from `yyyymm`.
 
 ---
 
-## Threats to validity (notes for manuscript)
+## Analysis
 
-1. **Construct validity of requirements identification**: OR-classifier favours
-   recall over precision. Mitigated by manual validation (script 08).
+`cell_15` produces descriptive statistics (per-period means, medians, SD, IQR).
 
-2. **Active cohort temporal confound**: active repos receive their abandoned
-   partner's T0 as pseudo-T0, which may not align with their actual activity
-   peak. Mitigated by monthly_commits control and age/stars matching.
+`cell_16` computes pre/post comparisons with **Mann–Whitney U tests** and **Cliff's δ** effect sizes on the eight repo-month outcome metrics.
 
-3. **Maintainer identity proxy**: "non-author response" used because maintainer
-   status is not reliably exposed by the GitHub issues API without extra calls.
+`cell_17` fits **interrupted time-series segmented regressions** of the form:
 
-4. **GitHub-centric sample**: results may not generalise to GitLab, Bitbucket,
-   or proprietary platforms.
+```
+y ~ month_index + post_ai_period + time_after_intervention
+```
 
-5. **Domain inference reliability**: topics are user-supplied and inconsistent
-   across repositories. Mitigated by word-boundary matching and 'other' fallback.
+estimated by OLS with HC3 heteroscedasticity-robust standard errors. Outcomes:
 
-6. **Multiple comparisons**: BH-FDR correction applied but does not eliminate
-   the possibility of false positives, particularly for outcomes that survive
-   correction with p-values close to the q=0.05 threshold.
+- `mean_commit_words`, `generic_commit_ratio`, `rationale_commit_ratio`
+- `mean_issue_words`, `repro_ratio`, `expected_actual_ratio`, `environment_ratio`, `vague_marker_ratio`
+
+`cell_18` re-estimates each model with **repository fixed effects** (`+ C(repo_name)`) as a sensitivity check. This absorbs all time-invariant repo-level heterogeneity.
+
+`cell_19` produces one trend plot per outcome (monthly mean over the study window, with a vertical line at the intervention month).
+
+---
+
+## Outputs
+
+The `results-*/results/` and `figures-*/figures/` directories contain the released artefacts. The key files are:
+
+**Configuration and provenance**
+- `study_config.json` — exact parameters used to produce the results
+- `methodological_audit_log.txt` — human-readable summary of the pipeline
+
+**Sample**
+- `final_repository_sample.csv` — 800 rows, repo-level metadata
+
+**Panel data**
+- `repo_month_panel.csv` — 51,200 repo-month rows (800 × 64 months) with all metrics and time variables
+- `commit_monthly_repo_metrics.csv` — 22,494 non-empty repo-months for commit metrics
+- `issue_monthly_repo_metrics.csv` — 17,317 non-empty repo-months for issue metrics
+
+**Statistical results**
+- `prepost_descriptive_statistics.csv` — period means/medians/SD/IQR per metric
+- `prepost_effect_sizes_tests.csv` — Mann–Whitney U + Cliff's δ
+- `interrupted_time_series_results.csv` — coefficients, SE, p-values for the ITS models
+- `interrupted_time_series_model_summaries.txt` — full statsmodels summaries
+- `repository_fixed_effects_results.csv` — ITS with `C(repo_name)` absorbing repo-level intercepts
+- `artifact_counts.csv` — number of items and contributing repositories per artefact
+
+**Workbook**
+- `HICSS2027_results_tables.xlsx` — all of the above as labelled sheets
+
+**Figures** (`trend_*.png`, 300 dpi)
+- `trend_mean_commit_words.png`, `trend_generic_commit_ratio.png`, `trend_rationale_commit_ratio.png`
+- `trend_mean_issue_words.png`, `trend_repro_ratio.png`, `trend_expected_actual_ratio.png`, `trend_environment_ratio.png`, `trend_vague_marker_ratio.png`
+
+---
+
+## Summary of findings
+
+In the released ITS estimates, the immediate-level shift at the January 2023 boundary (`post_ai_period`) is **not statistically significant for any of the eight outcomes** at conventional thresholds. Several **post-intervention slope** terms (`time_after_intervention`) are positive and significant, indicating that mean issue length, reproduction-step markers, expected/actual markers, and environment markers *rose* over the post-2023 period rather than declined. Commit-message metrics (mean words, generic ratio, rationale ratio) show no significant intervention-period change.
+
+The findings are consistent with an interpretation in which human-oriented explanation traces did **not** collapse in the post-2023 window — and, on several measures, became more frequent. We do not interpret this as a causal claim about generative AI; alternative explanations (template adoption, issue-form rollout on GitHub, changing repository composition, secular trends) are not excluded by the design.
+
+---
+
+## Known issues
+
+- **`post_ai_period_x` / `post_ai_period_y` in `repo_month_panel.csv`.** The monthly panel merges in `cell_14` produce two duplicated copies of the `post_ai_period` column (one from the commit-monthly frame, one from the issue-monthly frame) before the canonical `post_ai_period` column is recomputed from `yyyymm`. The canonical column is the one used by downstream analysis cells; the `_x` and `_y` copies are merge artefacts and should be ignored.
+- **Marker overlap.** `issue_has_vague_marker` includes very common substrings (`error`, `bug`, `problem`, `issue`) and will fire on many well-articulated issue bodies. It is best read as a *prevalence* indicator, not a *vagueness* classifier. See Threats to Validity.
+- **Heavy tails.** Several outcome distributions (notably `mean_commit_words` and `mean_issue_words`) are highly right-skewed with very large kurtosis. The ITS specifications are estimated in levels with HC3 robust SEs; log-transformed and trimmed-mean robustness checks are not included in the released results.
+
+---
+
+## Threats to validity
+
+1. **Construct validity of the markers.** All eight outcome metrics are computed from dictionary/regex substring matches that were not validated against human judgement. The marker lists are transparent and editable (`cell_05_define_text_metrics.py`), but they conflate surface presence of keywords with the underlying constructs they are meant to proxy (rationale, reproducibility, environment specificity, vagueness). No inter-rater agreement or held-out human-labelled gold set was constructed.
+2. **Intervention validity.** January 2023 is a *temporal landmark* selected from the history of public generative-AI tooling, not an exogenous shock applied to the sampled repositories. Any secular trend that turns at or near this point will produce the same pattern in the ITS coefficients. Without a credible control group, observed level/slope changes cannot be attributed to AI adoption.
+3. **Sample composition.** Sampling conditions on activity in both pre- and post-windows, which selects for *surviving* repositories and excludes projects that were abandoned during the window. This is a known source of survivorship bias in longitudinal mining studies.
+4. **Platform-level confounders.** GitHub introduced and refined issue forms / issue templates over the study period. Increases in structured-marker ratios (e.g., `expected_actual_ratio`, `environment_ratio`) may partly reflect platform UI changes rather than developer behaviour.
+5. **GH Archive coverage.** Event payloads are public-stream snapshots and may miss edits, deletions, or private interactions. Commit messages are taken from `PushEvent` payload arrays, which truncate above 20 commits per push; very large pushes are under-sampled.
+6. **External validity.** The sample is restricted to public GitHub repositories with sufficient longitudinal activity. Findings do not generalise to private repositories, GitLab/Bitbucket, or proprietary in-house development.
+7. **No AI-assistance detection.** The pipeline does not classify repositories or contributions by whether they were AI-assisted. Comparisons are between time periods, not between AI-using and non-AI-using projects.
+
+---
+
+## Reproduction
+
+1. Open a fresh Google Colab notebook.
+2. Copy the cells from `Scripts/` into the notebook in numerical order (one cell per notebook cell), or run them via `%run` against a checked-out copy of this repository.
+3. Run `cell_03` and provide your own Google Cloud project ID and GitHub token; accept the listed defaults to reproduce the released sample.
+4. Run `cell_04` through `cell_23` in order. The full pipeline takes several hours depending on BigQuery quota and GitHub rate limits. Metadata enrichment (`cell_07`) is checkpointed and safely resumable.
+
+The configuration file `study_config.json` records the exact parameters used to produce the released results.
+
+---
+
+## References
+
+The methodology draws on standard practice in empirical software engineering and mining software repositories:
+
+- ACM SIGSOFT Empirical Standards — https://www2.sigsoft.org/EmpiricalStandards/
+- Empirical Standards for Repository Mining — https://doi.org/10.1145/3524842.3528032
+- Kalliamvakou et al., *The Promises and Perils of Mining GitHub* — https://doi.org/10.1145/2597073.2597074
+- GH Archive — https://www.gharchive.org/
+- GitHub REST API rate limits — https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+
+---
+
+## License and citation
+
+License and citation information will be added on publication.
