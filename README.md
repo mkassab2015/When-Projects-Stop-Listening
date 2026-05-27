@@ -1,6 +1,6 @@
 # When Projects Stop Listening: Requirements Disengagement as a Longitudinal Precursor to Open-Source Software Abandonment
 
-> **HICSS 2027 Submission** 
+> **HICSS 2027 Submission** | Empirical Software Engineering | Mining Software Repositories
 
 This repository contains the complete, reproducible analysis pipeline for the paper *"When Projects Stop Listening: Requirements Disengagement as a Longitudinal Precursor to Open-Source Software Abandonment"*. The study introduces **Requirements Decay** as a four-dimensional construct and provides the first longitudinal matched-cohort evidence of requirements-related deterioration preceding OSS project abandonment.
 
@@ -138,7 +138,7 @@ This study used **LLM-assisted validation** (Claude Haiku) with an aligned promp
 
 | Metric | Value |
 |---|---|
-| Precision | 0.609 |
+| Precision | 0.609 (from `classifier_validation_overall.csv`) |
 | Recall | 0.731 |
 | F1 | 0.664 |
 | Accuracy | 0.686 |
@@ -217,7 +217,7 @@ Where τ_t is a **reversed** time index (τ=1 at month 24, furthest from T₀; �
 1. Full controls (baseline)
 2. No commit control
 3. Excluding final 6 months before T₀
-4. Well-matched pairs only (distance ≤ 2.0)
+4. Well-matched pairs only (`well_matched_pairs_only`, distance ≤ 2.0)
 
 ---
 
@@ -256,14 +256,14 @@ Key parameters in `00_config.py`:
 
 ```python
 N_ABANDONED  = 100     # Target matched pairs per cohort
-N_ACTIVE     = 100
+N_ACTIVE    = 100
 OBS_MONTHS   = 24      # Observation window length
 RUN_DATE     = '2026-05-10'  # Fixed reference date for reproducibility
 MIN_COMMITS_BEFORE_T0 = 20   # Minimum commits required in observation window
 MANUAL_VALIDATION_SIZE = 1000  # Issues to sample for classifier validation
 ```
 
-**Pilot mode:** Set `N_ABANDONED = N_ACTIVE = 10` to verify the pipeline end-to-end before running the full study.
+**Pilot mode:** Temporarily set `N_ABANDONED = N_ACTIVE = 10` in `00_config.py` to verify the pipeline end-to-end. The scripts are currently configured for the full study (N=100).
 
 **Scaling up:** After a successful pilot, set `N_ABANDONED = N_ACTIVE = 100`, delete `raw/` and `processed/` folders from Drive (not `results/` or `checkpoints/`), and rerun from script 02.
 
@@ -292,7 +292,6 @@ MANUAL_VALIDATION_SIZE = 1000  # Issues to sample for classifier validation
 ---
 
 
-
 ---
 
 ## Dependencies
@@ -311,3 +310,4 @@ GitHub API access requires Python `requests` (pre-installed in Colab).
 ## License
 
 This repository is released for academic reproducibility. The data extracted via the GitHub API is subject to GitHub's Terms of Service. The manuscript text is copyright of the authors.
+
