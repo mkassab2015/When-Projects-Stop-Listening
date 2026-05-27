@@ -1,0 +1,5 @@
+,requirement_issues,avg_actionability_score,avg_discussion_depth,ignored_requirement_ratio
+requirement_issues,True,True,True,True
+avg_actionability_score,True,True,True,True
+avg_discussion_depth,True,True,True,True
+ignored_requirement_ratio,True,True,True,True

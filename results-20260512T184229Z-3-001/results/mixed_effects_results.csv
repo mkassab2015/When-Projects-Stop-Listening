@@ -1,0 +1,8 @@
+outcome,controls,model_type,n_observations,n_repositories,coef_is_abandoned,p_is_abandoned,coef_interaction,p_interaction_raw,p_interaction_fdr,sig_fdr_q05,cohens_d_early,cohens_d_late,aic_intercepts,aic_slopes
+requirement_issues,log_commits only (log_total_issues excluded: endogenous),random_slopes,4272,178,-3.1282,0.0164,-0.0371,0.3002,0.5481,False,-0.652,-0.595,24781.02,24336.64
+requirement_ratio,log_commits only (log_total_issues excluded: endogenous),random_intercepts,2932,174,0.0,1.0,-0.0007,0.5699,0.7439,False,-0.929,-1.037,-inf,-355.53
+ignored_requirement_ratio,log_commits + log_total_issues,random_slopes,1671,140,-0.0114,0.8243,0.0116,0.0012,0.0084,True,0.505,0.207,606.11,570.11
+avg_vagueness_density,log_commits + log_total_issues,random_slopes,1671,140,0.0004,0.5137,0.0,0.8344,0.8344,False,0.216,0.152,-14432.17,-14478.3
+roadmap_issue_ratio,log_commits + log_total_issues,random_slopes,1671,140,-0.0599,0.0773,-0.0016,0.3132,0.5481,False,-0.664,-0.564,-1578.34,-1606.67
+avg_discussion_depth,log_commits + log_total_issues,random_intercepts,1671,140,-0.4623,0.1122,-0.0252,0.1424,0.4984,False,-0.686,-0.486,6995.91,7024.15
+bug_expectation_issues,log_commits only (log_total_issues excluded: endogenous),random_slopes,4272,178,-0.503,0.0892,0.0054,0.6376,0.7439,False,-0.312,-0.324,15314.67,15030.67

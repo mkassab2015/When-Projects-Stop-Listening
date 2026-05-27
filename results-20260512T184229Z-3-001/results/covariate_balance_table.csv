@@ -1,0 +1,4 @@
+variable,abandoned_mean,active_mean,abandoned_sd,active_sd,standardised_mean_diff,ttest_p,balance_ok
+log_stars,7.962,8.574,0.543,0.377,-1.309,0.0,False
+log_forks,5.979,6.258,0.918,0.753,-0.332,0.0199,False
+age_days,2940.1,2994.08,1275.353,1220.584,-0.043,0.7601,True

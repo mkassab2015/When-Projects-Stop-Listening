@@ -1,0 +1,22 @@
+outcome,specification,n,controls,coef_interaction,p_raw,p_fdr,sig_fdr
+requirement_issues,full_controls,4272,+ log_commits,-0.0337,0.0616,0.2156,False
+requirement_ratio,full_controls,2932,+ log_commits,-0.0007,0.5699,0.6239,False
+ignored_requirement_ratio,full_controls,1671,+ log_commits + log_total_issues,0.0111,0.0,0.0,True
+avg_vagueness_density,full_controls,1671,+ log_commits + log_total_issues,0.0,0.6239,0.6239,False
+roadmap_issue_ratio,full_controls,1671,+ log_commits + log_total_issues,-0.0014,0.2929,0.5126,False
+avg_discussion_depth,full_controls,1671,+ log_commits + log_total_issues,-0.0252,0.1424,0.3323,False
+bug_expectation_issues,full_controls,4272,+ log_commits,0.0051,0.3995,0.5593,False
+requirement_issues,no_commit_control,4272,+ log_total_issues,-0.0329,0.0481,0.2706,False
+requirement_ratio,no_commit_control,2932,+ log_total_issues,-0.0008,0.4954,0.5945,False
+avg_actionability_score,no_commit_control,1671,+ log_total_issues,-0.001,0.8213,0.8213,False
+roadmap_issue_ratio,no_commit_control,1671,+ log_total_issues,-0.0017,0.195,0.39,False
+avg_discussion_depth,no_commit_control,1671,+ log_total_issues,-0.0289,0.0902,0.2706,False
+bug_expectation_issues,no_commit_control,4272,+ log_total_issues,0.0054,0.3652,0.5478,False
+requirement_issues,exclude_last_6_months,3204,+ log_commits,-0.0646,0.0179,0.0716,False
+avg_vagueness_density,exclude_last_6_months,1258,+ log_commits + log_total_issues,-0.0,0.8776,0.8776,False
+roadmap_issue_ratio,exclude_last_6_months,1258,+ log_commits + log_total_issues,-0.0021,0.3143,0.6286,False
+bug_expectation_issues,exclude_last_6_months,3204,+ log_commits,-0.0057,0.5646,0.7528,False
+requirement_issues,well_matched_pairs_only,3888,+ log_commits,-0.0466,0.0163,0.0652,False
+requirement_ratio,well_matched_pairs_only,2690,+ log_commits,-0.0006,0.637,0.637,False
+roadmap_issue_ratio,well_matched_pairs_only,1522,+ log_commits + log_total_issues,-0.0012,0.3664,0.5597,False
+bug_expectation_issues,well_matched_pairs_only,3888,+ log_commits,0.0053,0.4198,0.5597,False

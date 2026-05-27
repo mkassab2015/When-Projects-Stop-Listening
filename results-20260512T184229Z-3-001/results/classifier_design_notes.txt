@@ -1,0 +1,5 @@
+Classifier: OR(label_signal, text_signal) — high recall by design.
+Precision unknown until manual validation (script 08).
+vagueness_density = vagueness_count / word_count.
+actionability_score: equal-weight composite (0–4), exploratory.
+bug_expectation kept as a separate type.

@@ -1,0 +1,187 @@
+!pip install anthropic -q
+
+import anthropic
+import pandas as pd
+import json
+import re
+import time
+import os
+from pathlib import Path
+
+ROOT   = Path('/content/drive/MyDrive/requirements_decay_study')
+MANUAL = ROOT / 'manual_coding'
+
+sample = pd.read_csv(MANUAL / 'manual_coding_sample.csv')
+client = anthropic.Anthropic(api_key=os.environ.get('TOKEN'))
+
+PROMPT_TEMPLATE = """You are validating an automated classifier for a Requirements Engineering study.
+
+The classifier labels a GitHub issue as a REQUIREMENT if the issue carries
+certain labels OR contains certain phrases. Apply exactly the same logic.
+
+ISSUE TITLE: {title}
+ISSUE BODY: {body}
+ISSUE LABELS: {labels}
+
+Label as is_requirement=1 if ANY of the following are true, else 0.
+
+RULE A — Issue has at least one of these labels:
+enhancement, feature, proposal, request, usability, ux, performance,
+security, compatibility, roadmap, wish, improvement
+
+RULE B — Issue title or body contains at least one of these phrases:
+should support, please add, feature request, it would be nice,
+it would be useful, it would be helpful, it would be great,
+users need, users want, users expect, user need, user want,
+expected behavior, expected behaviour, actual behavior, actual behaviour,
+should be able to, allow users to, support for, would like to,
+would love to, missing feature, missing support, missing option,
+currently impossible, currently not possible, currently unsupported,
+as a user, use case
+
+Apply rules mechanically. If a label or phrase matches, return 1. Otherwise 0.
+
+req_type values: feature, quality, compatibility, bug_expectation,
+documentation, non_requirement, unclear
+
+Respond with ONLY this JSON. Use only double quotes. Keep notes under 50 chars.
+
+{{"is_requirement": 0, "req_type": "non_requirement", "has_expected_behavior": 0, "has_rationale": 0, "has_acceptance": 0, "is_actionable": 0, "notes": "reason here"}}"""
+
+
+def safe_parse_json(text):
+    """Extract JSON robustly from LLM response."""
+    # Clean the text
+    text = text.strip()
+    text = text.replace('```json', '').replace('```', '').strip()
+
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+
+    # Try to find JSON object with regex
+    match = re.search(r'\{[^{}]+\}', text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except Exception:
+            pass
+
+    # Try extracting just the key fields we need
+    result = {}
+    for field, pattern in [
+        ('is_requirement',       r'"is_requirement"\s*:\s*([01])'),
+        ('req_type',             r'"req_type"\s*:\s*"([^"]+)"'),
+        ('has_expected_behavior',r'"has_expected_behavior"\s*:\s*([01])'),
+        ('has_rationale',        r'"has_rationale"\s*:\s*([01])'),
+        ('has_acceptance',       r'"has_acceptance"\s*:\s*([01])'),
+        ('is_actionable',        r'"is_actionable"\s*:\s*([01])'),
+    ]:
+        m = re.search(pattern, text)
+        if m:
+            val = m.group(1)
+            result[field] = int(val) if val in ('0','1') else val
+    if 'is_requirement' in result:
+        return result
+
+    return None
+
+
+# ── Resume from saved progress ─────────────────────────────────────────────
+progress_path = MANUAL / 'recode_progress.csv'
+results  = []
+done_ids = set()
+
+if progress_path.exists():
+    done_df  = pd.read_csv(progress_path)
+    # Keep only valid rows
+    done_df  = done_df.dropna(subset=['issue_id'])
+    results  = done_df.to_dict('records')
+    done_ids = set(done_df['issue_id'].tolist())
+    print(f'Resuming from {len(done_ids)} already coded')
+
+todo = sample[~sample['issue_id'].isin(done_ids)]
+print(f'Issues remaining: {len(todo)}')
+
+failed = []
+
+for _, row in todo.iterrows():
+    try:
+        # Truncate body to avoid overly long prompts
+        title  = str(row.get('title',  ''))[:200]
+        body   = str(row.get('body',   ''))[:800]
+        labels = str(row.get('labels', ''))[:200]
+
+        # Remove characters that break JSON
+        body = body.replace('"', "'").replace('\n', ' ').replace('\r', ' ')
+        body = re.sub(r'[^\x20-\x7E]', ' ', body)  # ASCII only
+
+        prompt = PROMPT_TEMPLATE.format(
+            title=title, body=body, labels=labels)
+
+        response = client.messages.create(
+            model      = 'claude-haiku-4-5',
+            max_tokens = 200,
+            messages   = [{'role': 'user', 'content': prompt}],
+        )
+
+        raw    = response.content[0].text.strip()
+        parsed = safe_parse_json(raw)
+
+        if parsed and 'is_requirement' in parsed:
+            results.append({
+                'issue_id':                     row['issue_id'],
+                'manual_is_requirement':        int(parsed.get('is_requirement', 0)),
+                'manual_req_type':              str(parsed.get('req_type', 'unclear')),
+                'manual_has_expected_behavior': int(parsed.get('has_expected_behavior', 0)),
+                'manual_has_rationale':         int(parsed.get('has_rationale', 0)),
+                'manual_has_acceptance':        int(parsed.get('has_acceptance', 0)),
+                'manual_is_actionable':         int(parsed.get('is_actionable', 0)),
+                'manual_notes':                 str(parsed.get('notes', ''))[:100],
+            })
+            done_ids.add(row['issue_id'])
+        else:
+            print(f'  Unparseable response for {row["issue_id"]}: {raw[:80]}')
+            failed.append({'issue_id': row['issue_id'], 'error': 'unparseable'})
+
+        # Save every 50 issues
+        if len(results) % 50 == 0:
+            pd.DataFrame(results).to_csv(progress_path, index=False)
+            print(f'  {len(results) + len(done_ids) - len(results)}/{len(sample)} '
+                  f'| done so far: {len(results)}')
+
+        time.sleep(0.5)
+
+    except anthropic.AuthenticationError:
+        print('AUTH ERROR — check your API key')
+        break
+    except Exception as e:
+        print(f'  Failed {row.get("issue_id")}: {str(e)[:80]}')
+        failed.append({'issue_id': row.get('issue_id'), 'error': str(e)[:80]})
+        time.sleep(1)
+
+# ── Final save ─────────────────────────────────────────────────────────────
+pd.DataFrame(results).to_csv(progress_path, index=False)
+
+# Build completed file preserving all original sample columns
+coded_df = pd.DataFrame(results).set_index('issue_id')
+final    = sample.copy()
+
+for col in ['manual_is_requirement', 'manual_req_type',
+            'manual_has_expected_behavior', 'manual_has_rationale',
+            'manual_has_acceptance', 'manual_is_actionable', 'manual_notes']:
+    if col in coded_df.columns:
+        final[col] = final['issue_id'].map(coded_df[col])
+
+final.to_csv(MANUAL / 'manual_coding_completed.csv', index=False)
+
+print(f'\nDone.')
+print(f'  Successfully coded: {len(results)}')
+print(f'  Failed/skipped:     {len(failed)}')
+print(f'  Requirement prevalence: {pd.DataFrame(results)["manual_is_requirement"].mean():.1%}')
+
+if failed:
+    pd.DataFrame(failed).to_csv(MANUAL / 'recode_failed.csv', index=False)
+    print(f'  Failed IDs saved to recode_failed.csv')

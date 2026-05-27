@@ -1,0 +1,24 @@
+Outcome: requirement_issues
+Controls: log_commits only (log_total_issues excluded: endogenous)
+Model: random_slopes
+time_to_t0_rev=1→month 24; =24→month 1 (near T0)
+                Mixed Linear Model Regression Results
+======================================================================
+Model:              MixedLM   Dependent Variable:   requirement_issues
+No. Observations:   4272      Method:               ML                
+No. Groups:         178       Scale:                13.3244           
+Min. group size:    24        Log-Likelihood:       -12159.3195       
+Max. group size:    24        Converged:            Yes               
+Mean group size:    24.0                                              
+----------------------------------------------------------------------
+                            Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------
+Intercept                    2.788    0.930  2.998 0.003  0.966  4.611
+is_abandoned                -3.128    1.304 -2.399 0.016 -5.684 -0.572
+time_to_t0_rev               0.056    0.025  2.207 0.027  0.006  0.105
+is_abandoned:time_to_t0_rev -0.037    0.036 -1.036 0.300 -0.107  0.033
+log_commits                  0.670    0.058 11.493 0.000  0.555  0.784
+Group Var                   73.143    3.811                           
+Group x time_to_t0_rev Cov  -0.594    0.056                           
+time_to_t0_rev Var           0.045    0.002                           
+======================================================================

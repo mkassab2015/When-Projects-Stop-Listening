@@ -1,0 +1,37 @@
+outcome,specification,n,n_repos,controls,coef_interaction,p_raw,p_fdr,sig_raw,sig_fdr,aic,status
+requirement_issues,full_controls,4272,178.0,+ log_commits,-0.0337,0.0616,0.2156,False,False,24781.02,ok
+requirement_ratio,full_controls,2932,174.0,+ log_commits,-0.0007,0.5699,0.6239,False,False,-inf,ok
+ignored_requirement_ratio,full_controls,1671,140.0,+ log_commits + log_total_issues,0.0111,0.0,0.0,True,True,606.11,ok
+avg_actionability_score,full_controls,1671,,,,,,,,,error:Singular matrix
+avg_vagueness_density,full_controls,1671,140.0,+ log_commits + log_total_issues,0.0,0.6239,0.6239,False,False,-14432.17,ok
+roadmap_issue_ratio,full_controls,1671,140.0,+ log_commits + log_total_issues,-0.0014,0.2929,0.5126,False,False,-1578.34,ok
+avg_first_response_hours,full_controls,1512,,,,,,,,,error:Singular matrix
+avg_discussion_depth,full_controls,1671,140.0,+ log_commits + log_total_issues,-0.0252,0.1424,0.3323,False,False,6995.91,ok
+bug_expectation_issues,full_controls,4272,178.0,+ log_commits,0.0051,0.3995,0.5593,False,False,15314.67,ok
+requirement_issues,no_commit_control,4272,178.0,+ log_total_issues,-0.0329,0.0481,0.2706,True,False,24193.32,ok
+requirement_ratio,no_commit_control,2932,174.0,+ log_total_issues,-0.0008,0.4954,0.5945,False,False,-inf,ok
+ignored_requirement_ratio,no_commit_control,1671,,,,,,,,,error:Singular matrix
+avg_actionability_score,no_commit_control,1671,140.0,+ log_total_issues,-0.001,0.8213,0.8213,False,False,2599.63,ok
+avg_vagueness_density,no_commit_control,1671,,,,,,,,,error:Singular matrix
+roadmap_issue_ratio,no_commit_control,1671,140.0,+ log_total_issues,-0.0017,0.195,0.39,False,False,-1576.66,ok
+avg_first_response_hours,no_commit_control,1512,,,,,,,,,error:Singular matrix
+avg_discussion_depth,no_commit_control,1671,140.0,+ log_total_issues,-0.0289,0.0902,0.2706,False,False,6997.35,ok
+bug_expectation_issues,no_commit_control,4272,178.0,+ log_total_issues,0.0054,0.3652,0.5478,False,False,15252.54,ok
+requirement_issues,exclude_last_6_months,3204,178.0,+ log_commits,-0.0646,0.0179,0.0716,True,False,18664.3,ok
+requirement_ratio,exclude_last_6_months,2167,,,,,,,,,error:Singular matrix
+ignored_requirement_ratio,exclude_last_6_months,1258,,,,,,,,,error:Singular matrix
+avg_actionability_score,exclude_last_6_months,1258,,,,,,,,,error:Singular matrix
+avg_vagueness_density,exclude_last_6_months,1258,133.0,+ log_commits + log_total_issues,-0.0,0.8776,0.8776,False,False,-10731.81,ok
+roadmap_issue_ratio,exclude_last_6_months,1258,133.0,+ log_commits + log_total_issues,-0.0021,0.3143,0.6286,False,False,-1104.71,ok
+avg_first_response_hours,exclude_last_6_months,1144,,,,,,,,,error:Singular matrix
+avg_discussion_depth,exclude_last_6_months,1258,,,,,,,,,error:Singular matrix
+bug_expectation_issues,exclude_last_6_months,3204,178.0,+ log_commits,-0.0057,0.5646,0.7528,False,False,12043.16,ok
+requirement_issues,well_matched_pairs_only,3888,162.0,+ log_commits,-0.0466,0.0163,0.0652,True,False,22743.77,ok
+requirement_ratio,well_matched_pairs_only,2690,160.0,+ log_commits,-0.0006,0.637,0.637,False,False,-inf,ok
+ignored_requirement_ratio,well_matched_pairs_only,1522,,,,,,,,,error:Singular matrix
+avg_actionability_score,well_matched_pairs_only,1522,,,,,,,,,error:Singular matrix
+avg_vagueness_density,well_matched_pairs_only,1522,,,,,,,,,error:Singular matrix
+roadmap_issue_ratio,well_matched_pairs_only,1522,128.0,+ log_commits + log_total_issues,-0.0012,0.3664,0.5597,False,False,-1364.27,ok
+avg_first_response_hours,well_matched_pairs_only,1377,,,,,,,,,error:Singular matrix
+avg_discussion_depth,well_matched_pairs_only,1522,,,,,,,,,error:Singular matrix
+bug_expectation_issues,well_matched_pairs_only,3888,162.0,+ log_commits,0.0053,0.4198,0.5597,False,False,14292.79,ok

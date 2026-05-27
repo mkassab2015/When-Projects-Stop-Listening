@@ -1,0 +1,8 @@
+from google.colab import drive
+drive.mount('/content/drive')
+
+import os
+os.environ['GITHUB_TOKEN'] = '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'
+
+print('Drive mounted:', 'MyDrive' in os.listdir('/content/drive'))
+print('Token loaded:', bool(os.environ.get('GITHUB_TOKEN')))

@@ -1,0 +1,24 @@
+Outcome: bug_expectation_issues
+Controls: log_commits only (log_total_issues excluded: endogenous)
+Model: random_slopes
+time_to_t0_rev=1→month 24; =24→month 1 (near T0)
+                Mixed Linear Model Regression Results
+======================================================================
+Model:              MixedLM Dependent Variable: bug_expectation_issues
+No. Observations:   4272    Method:             ML                    
+No. Groups:         178     Scale:              1.5824                
+Min. group size:    24      Log-Likelihood:     -7506.3359            
+Max. group size:    24      Converged:          Yes                   
+Mean group size:    24.0                                              
+----------------------------------------------------------------------
+                            Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------
+Intercept                    0.432    0.213  2.025 0.043  0.014  0.850
+is_abandoned                -0.503    0.296 -1.700 0.089 -1.083  0.077
+time_to_t0_rev              -0.004    0.008 -0.500 0.617 -0.020  0.012
+is_abandoned:time_to_t0_rev  0.005    0.012  0.471 0.638 -0.017  0.028
+log_commits                  0.083    0.020  4.193 0.000  0.044  0.122
+Group Var                    3.596    0.335                           
+Group x time_to_t0_rev Cov  -0.061    0.010                           
+time_to_t0_rev Var           0.005    0.001                           
+======================================================================

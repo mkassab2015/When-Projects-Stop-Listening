@@ -1,0 +1,5 @@
+cohort,period,n,precision,recall,f1
+abandoned,early,212,0.657,0.696,0.676
+abandoned,late,210,0.679,0.768,0.72
+active,early,248,0.573,0.732,0.643
+active,late,248,0.54,0.728,0.62

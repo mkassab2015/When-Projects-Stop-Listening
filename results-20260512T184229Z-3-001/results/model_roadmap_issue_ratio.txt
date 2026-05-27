@@ -1,0 +1,25 @@
+Outcome: roadmap_issue_ratio
+Controls: log_commits + log_total_issues
+Model: random_slopes
+time_to_t0_rev=1→month 24; =24→month 1 (near T0)
+                Mixed Linear Model Regression Results
+======================================================================
+Model:               MixedLM  Dependent Variable:  roadmap_issue_ratio
+No. Observations:    1671     Method:              ML                 
+No. Groups:          140      Scale:               0.0172             
+Min. group size:     1        Log-Likelihood:      813.3352           
+Max. group size:     24       Converged:           Yes                
+Mean group size:     11.9                                             
+----------------------------------------------------------------------
+                            Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------
+Intercept                    0.052    0.026  2.052 0.040  0.002  0.102
+is_abandoned                -0.060    0.034 -1.766 0.077 -0.126  0.007
+time_to_t0_rev               0.001    0.001  0.802 0.422 -0.001  0.002
+is_abandoned:time_to_t0_rev -0.002    0.002 -1.009 0.313 -0.005  0.002
+log_commits                  0.006    0.004  1.790 0.073 -0.001  0.013
+log_total_issues             0.010    0.007  1.384 0.166 -0.004  0.024
+Group Var                    0.025    0.030                           
+Group x time_to_t0_rev Cov  -0.000    0.001                           
+time_to_t0_rev Var           0.000    0.000                           
+======================================================================

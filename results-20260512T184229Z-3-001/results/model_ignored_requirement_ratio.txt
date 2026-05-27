@@ -1,0 +1,25 @@
+Outcome: ignored_requirement_ratio
+Controls: log_commits + log_total_issues
+Model: random_slopes
+time_to_t0_rev=1→month 24; =24→month 1 (near T0)
+                 Mixed Linear Model Regression Results
+=======================================================================
+Model:            MixedLM Dependent Variable: ignored_requirement_ratio
+No. Observations: 1671    Method:             ML                       
+No. Groups:       140     Scale:              0.0670                   
+Min. group size:  1       Log-Likelihood:     -275.0527                
+Max. group size:  24      Converged:          Yes                      
+Mean group size:  11.9                                                 
+-----------------------------------------------------------------------
+                             Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------
+Intercept                     0.126    0.041  3.092 0.002  0.046  0.206
+is_abandoned                 -0.011    0.051 -0.222 0.824 -0.112  0.089
+time_to_t0_rev                0.002    0.002  0.990 0.322 -0.002  0.006
+is_abandoned:time_to_t0_rev   0.012    0.004  3.232 0.001  0.005  0.019
+log_commits                   0.004    0.007  0.658 0.510 -0.009  0.017
+log_total_issues              0.012    0.013  0.915 0.360 -0.014  0.038
+Group Var                     0.037    0.034                           
+Group x time_to_t0_rev Cov   -0.001    0.002                           
+time_to_t0_rev Var            0.000    0.000                           
+=======================================================================

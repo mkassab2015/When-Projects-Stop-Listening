@@ -1,0 +1,25 @@
+Outcome: avg_vagueness_density
+Controls: log_commits + log_total_issues
+Model: random_slopes
+time_to_t0_rev=1→month 24; =24→month 1 (near T0)
+                Mixed Linear Model Regression Results
+======================================================================
+Model:             MixedLM  Dependent Variable:  avg_vagueness_density
+No. Observations:  1671     Method:              ML                   
+No. Groups:        140      Scale:               0.0000               
+Min. group size:   1        Log-Likelihood:      7249.1476            
+Max. group size:   24       Converged:           Yes                  
+Mean group size:   11.9                                               
+----------------------------------------------------------------------
+                            Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------
+Intercept                    0.001    0.000  2.603 0.009  0.000  0.002
+is_abandoned                 0.000    0.001  0.653 0.514 -0.001  0.002
+time_to_t0_rev               0.000    0.000  0.475 0.635 -0.000  0.000
+is_abandoned:time_to_t0_rev  0.000    0.000  0.209 0.834 -0.000  0.000
+log_commits                  0.000    0.000  0.992 0.321 -0.000  0.000
+log_total_issues            -0.000    0.000 -1.184 0.237 -0.000  0.000
+Group Var                    0.000    0.001                           
+Group x time_to_t0_rev Cov  -0.000    0.000                           
+time_to_t0_rev Var           0.000    0.000                           
+======================================================================
